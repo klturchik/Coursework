@@ -1,0 +1,43 @@
+Command? Q
+City code: LV
+12 LV LEE VINING 8390 5983
+Command? D
+City codes: CH PM
+The minimum distance between CHINO HILLS and POMONA is 143 through the route: [CH, PR, TR, PM]
+Command? I
+City codes: GG BO 100
+Successfully added a road from GARDEN GRPVE to BOSSTOWN with a distance of 100
+Command? R
+City codes: KV MP
+ERROR: No road found from KERNVILLE to MOUNTAIN PASS
+Command? E
+Thank you for using dijkstra maps!
+
+==================================================
+
+Command? Q
+City code: AN
+1 AN ANAHEIM 1273000 310
+Command? D
+City codes: AN BR
+The minimum distance between ANAHEIM and BREA CANYON is 212 through the route: [AN, BR]
+Command? D
+City codes: PM FI
+The minimum distance between POMONA and FORT IRWIN is 346 through the route: [PM, ED, AN, VV, CH, GG, FI]
+Command? D
+City codes: BK BR
+The minimum distance between BAKERSFIELD and BREA CANYON is 143 through the route: [BK, LV, BO, GG, LI, BR]
+Command? I
+City codes: BK AN 74
+ERROR: A road already exists from BAKERSFIELD to ANAHEIM
+Command? R
+City codes: BK ED
+ERROR: No road found from BAKERSFIELD to EDWIN DOM
+Command? I
+City codes: BK ED 56
+Successfully added a road from BAKERSFIELD to EDWIN DOM with a distance of 56
+Command? D
+City codes: BK ED
+The minimum distance between BAKERSFIELD and EDWIN DOM is 56 through the route: [BK, ED]
+Command? E
+Thank you for using dijkstra maps!

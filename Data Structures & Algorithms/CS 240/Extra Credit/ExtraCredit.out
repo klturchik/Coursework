@@ -1,0 +1,13 @@
+Postfix:  value1 value2 + 3 * 
+Values:   1 2 
+Evaluation = 9
+
+Infix:    a+b*c
+Postfix:  a b c * + 
+Values:   1 2 3 
+Evaluation = 7
+
+Infix:    (a+b)*(c-d)
+Postfix:  a b + c d - * 
+Values:   1 2 3 4 
+Evaluation = -3

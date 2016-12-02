@@ -1,0 +1,121 @@
+-------- GIVEN TEST CASE --------
+--------- Basic Methods ---------
+A.toString(): {1, 3, 5, 7}
+B.toString(): {3, 4, 5}
+D.toString(): {}
+
+A.size(): 4
+B.size(): 3
+D.size(): 0
+
+A.contain(3): true
+A.contain(4): false
+B.contain(3): true
+B.contain(4): true
+D.contain(3): false
+D.contain(4): false
+
+------ Comparison Methods -------
+if C=A.union(B): then C={1, 3, 5, 7, 4}
+if C=A.intersection(B).toString(): then C={3, 5}
+if C=A.complement(B).toString(): then C={1, 7}
+
+D.subsetOf(A): true
+D.subsetOf(B): true
+D.subsetOf(D): true
+D.subsetOf(C): true
+
+A.subsetOf(B): false
+(A.intersection(B)).subsetOf(A): true
+
+A.isEqual(B): false
+B.isEqual(D): false
+
+------- Changing the Data -------
+A.addElement(4): true
+A.addElement(6): true
+A.remove(1): true
+B.remove(4): true
+
+A.toString(): {3, 5, 7, 4, 6}
+B.toString(): {3, 5}
+
+A.addElement(3): false
+B.remove(2): false
+
+A.union(B).toString():{3, 5, 7, 4, 6}
+A.intersection(B).toString():{3, 5}
+A.complement(B).toString():{7, 4, 6}
+
+
+----- ADDITIONAL TEST CASES -----
+---------- TEST CASE 1 ----------
+A.toString(): {1, 2, 3}
+A.size(): 3
+B.toString(): {2, 1, 3}
+B.size(): 3
+
+A.subsetOf(B): true
+B.subsetOf(A): true
+A.isEqual(B): true
+
+A.union(B).toString():{1, 2, 3}
+A.intersection(B).toString():{1, 2, 3}
+A.complement(B).toString():{}
+
+---------- TEST CASE 2 ----------
+A.toString(): {1}
+A.size(): 1
+B.toString(): {1, 2}
+B.size(): 2
+
+A.subsetOf(B): true
+B.subsetOf(A): false
+A.isEqual(B): false
+
+A.union(B).toString():{1, 2}
+A.intersection(B).toString():{1}
+A.complement(B).toString():{}
+
+---------- TEST CASE 3 ----------
+A.toString(): {1, 2, 3}
+A.size(): 3
+B.toString(): {2, 3, 4, 5}
+B.size(): 4
+
+A.subsetOf(B): false
+B.subsetOf(A): false
+A.isEqual(B): false
+
+A.union(B).toString():{1, 2, 3, 4, 5}
+A.intersection(B).toString():{2, 3}
+A.complement(B).toString():{1}
+
+---------- TEST CASE 4 ----------
+A.toString(): {1}
+A.size(): 1
+B.toString(): {2, 3}
+B.size(): 2
+
+A.subsetOf(B): false
+B.subsetOf(A): false
+A.isEqual(B): false
+
+A.union(B).toString():{1, 2, 3}
+A.intersection(B).toString():{}
+A.complement(B).toString():{1}
+
+---------- TEST CASE 5 ----------
+A.toString(): {}
+A.size(): 0
+B.toString(): {1, 2, 3}
+B.size(): 3
+
+A.subsetOf(B): true
+B.subsetOf(A): false
+A.isEqual(B): false
+
+A.union(B).toString():{1, 2, 3}
+A.intersection(B).toString():{}
+A.complement(B).toString():{}
+

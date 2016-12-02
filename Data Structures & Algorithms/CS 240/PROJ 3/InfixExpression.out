@@ -1,0 +1,25 @@
+CUSTOM TEST CASES:
+Infix:    3+4*5/6
+Postfix:  345*6/+
+Prefix:   +3/*456
+
+Infix:    (a+b-c)*(e/f)-(g-h/i)
+Postfix:  ab+c-ef/*ghi/--
+Prefix:   -*-+abc/ef-g/hi
+
+PROVIDED TEST CASES:
+Infix:    A*(B+C)/D
+Postfix:  ABC+*D/
+Prefix:   /*A+BCD
+
+Infix:    a+b+c
+Postfix:  ab+c+
+Prefix:   ++abc
+
+Infix:    a+b*c
+Postfix:  abc*+
+Prefix:   +a*bc
+
+Infix:    (a+b)*(c-d)
+Postfix:  ab+cd-*
+Prefix:   *+ab-cd

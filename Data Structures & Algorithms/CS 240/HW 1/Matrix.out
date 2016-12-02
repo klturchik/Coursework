@@ -1,0 +1,93 @@
+Test Case 1: Given
+Matrix B:
+   1    3    5    7 
+   2    4    6    8 
+Matrix C:
+   1    8    9 
+   2    7   10 
+   3    6   11 
+   4    5   12 
+Scalar c = 6
+
+A = B * C:
+  50   94  178 
+  60  120  220 
+A = c * B:
+   6   18   30   42 
+  12   24   36   48 
+Error IllegalArgumentException:
+Matrix B and Matrix C do not have the same dimensions
+A = B + C:
+
+--------------------
+Test Case 2:
+Matrix B:
+   7    3 
+   2    5 
+   6    8 
+   9    0 
+Matrix C:
+   7    4    9 
+   8    1    5 
+Scalar c = 4
+
+A = B * C:
+  73   31   78 
+  54   13   43 
+ 106   32   94 
+  63   36   81 
+A = c * B:
+  28   12 
+   8   20 
+  24   32 
+  36    0 
+Error IllegalArgumentException:
+Matrix B and Matrix C do not have the same dimensions
+A = B + C:
+
+
+
+
+
+
+
+
+--------------------
+Test Case 3:
+Matrix B:
+   2    1 
+   3    2 
+  -2    2 
+Matrix C:
+   1    1 
+   4    2 
+  -2    1 
+Scalar c = 7
+
+Error IllegalArgumentException:
+Number of columns in Matrix B does not equal number of rows in Matrix C
+A = B * C:
+A = c * B:
+  14    7 
+  21   14 
+ -14   14 
+A = B + C:
+   3    2 
+   7    4 
+  -4    3 
+
+--------------------
+Original method main:
+matrix A:
+   1    2    3 
+   4    5    6 
+transpose A:
+   1    4 
+   2    5 
+   3    6 
+identity:
+   1    0    0    0    0 
+   0    1    0    0    0 
+   0    0    1    0    0 
+   0    0    0    1    0 
+   0    0    0    0    1 
