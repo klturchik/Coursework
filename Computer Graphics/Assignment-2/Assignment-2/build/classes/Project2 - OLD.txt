@@ -1,0 +1,499 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+import java.io.File;
+import java.io.FileNotFoundException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.input.Keyboard;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ *  created by Kyle Turchik, 10/22/16
+ */
+public class Project2 {
+
+    // Main Window settings
+    public static final int WINDOW_WIDTH = 640;
+    public static final int WINDOW_HEIGHT = 480;
+    public static final String WINDOW_TITLE = "Kyle Turchik - Project 2";
+    
+    ArrayList instr = new ArrayList();
+    ArrayList tranH = new ArrayList();
+    
+    static int pCount = 0;
+    static int tCount = 0;   
+/*  public static String pString = "";
+    public static String tString = "";
+    public static int arrCounter;
+    public static int pCounter = 0;
+    public static int tCounter = 0;*/
+
+    //
+    //
+    //
+    private void printE(edges[] x) {
+        for (int i = 0; i < x.length; i++) {
+            System.out.println("Printing : " + x[i].ymin + "  " + x[i].ymax + "  " + x[i].xval + "  " + x[i].m);
+        }
+        System.out.println();
+    }
+    //
+    //
+    //
+    
+    // method: main
+    // purpose: basic driver method that starts the program
+    public static void main(String[] args) throws Exception {
+        Project2 proj = new Project2();
+        proj.start();
+    }
+    
+        //method: createWindow
+    //purpose: creates the window, specifying no fullscreen and its resolution, title
+    private void createWindow() throws Exception {
+        Display.setFullscreen(false);
+        Display.setDisplayMode(new DisplayMode(WINDOW_WIDTH, WINDOW_HEIGHT));
+        Display.setTitle(WINDOW_TITLE);
+        Display.create();
+    }
+
+    //method: initGL
+    //purpose: initialize background color, camera, matrix 
+    private void initGL() {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-320, 320, -240, 240, 1, -1);
+        glMatrixMode(GL_MODELVIEW);
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    }
+
+    private void start() throws Exception {
+        try{
+            createWindow();
+            initGL();
+
+            File file = new File("coordinates.txt");
+
+            while(!Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+                //render
+                readFile(file); 
+                Display.update();
+                Display.sync(60);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Display.destroy();
+    }
+    
+    
+    // TODO This is Vu's Code change it up a bit
+    // method: readFile
+    // purpose: sequentially reads in data line by line from a premade file
+    // then performs commands based on the data
+    private void readFile(File file) throws Exception {
+        try{
+            String line, set[];
+            Scanner reader = new Scanner(file);
+
+            while (reader.hasNext()) {
+                instr.add(reader.nextLine());
+            }
+            System.out.println(instr);
+            
+            while (pCount < instr.size()) {
+                line = (String) instr.get(pCount);
+                //
+                System.out.println("outside : " + line);
+                //
+                pCount++;
+                set = line.split(" ");
+                if (set[0].equals("P")) {
+                    createPoly(set);
+                }
+            }
+
+            System.out.println("End : Count = 0");
+            pCount = 0;
+        } catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+
+
+    private void createPoly(String[] set) {
+        polygon shape = new polygon();
+        String[] setT = null;
+        String type = (String) instr.get(pCount);
+        shape.colors[0] = Float.parseFloat(set[1]);
+        shape.colors[1] = Float.parseFloat(set[2]);
+        shape.colors[2] = Float.parseFloat(set[3]);
+        
+        while (pCount < instr.size()) {
+            type = (String) instr.get(pCount);
+            set = (type.split(" "));
+            pCount++;
+            
+            if (set[0].equals("T") == false) {
+                System.out.println("inside " + type);
+                shape.coords.add(Integer.parseInt(set[0]));
+                shape.coords.add(Integer.parseInt(set[1]));
+            } else {
+                glPushMatrix();
+                while (set[0].equals("P") == false && pCount < instr.size()) {
+                    type = (String) instr.get(pCount);
+                    set = (type.split(" "));
+                    pCount++;
+                    if (set[0].equals("P") == false) {
+
+//                System.out.println("hit1");
+                        tranH.add(set);
+                    } else if ((set[0].equals("P"))) {
+                        System.out.println("sending " + set[0]);
+                        for (int i = tranH.size()-1; i >= 0; i--) {
+                            setT = (String[]) tranH.get(i);
+
+                            System.out.println("inside2 " + setT[0]);
+                            if (setT[0].equals("t")) {
+                                System.out.println("translating " + setT);
+                                glTranslatef(Integer.parseInt(setT[1]), Integer.parseInt(setT[2]), 1);
+                            } else if (setT[0].equals("r")) {
+                                System.out.println("rotating " + setT);
+                                glRotatef(Integer.parseInt(setT[1]), Integer.parseInt(setT[2]), Integer.parseInt(setT[3]), 1);
+                            } else {
+                                System.out.println("scaling " + setT);
+                                glRotatef(Float.parseFloat(setT[1]), Float.parseFloat(setT[2]), Float.parseFloat(setT[3]), 1);
+                            }
+                        }
+                    }
+                }
+                glRotatef(43, 50, 190, 1);
+                drawPoly(shape);
+                glPopMatrix();
+
+                System.out.println("sending " + set[0]);
+                if (set[0].equals("P")) {
+                    createPoly(set);
+                }
+            }
+        }
+    }
+
+    private edges[] sortY(edges[] sortE) {
+        edges[] ret = new edges[sortE.length];
+//        printE(sortE);  
+        System.out.println("sorting ");
+        edges temp = new edges();
+        int counter = 0;
+        for (int j = 0; j < sortE.length; j++) {
+            for (int i = j + 1; i < sortE.length; i++) {
+//            System.out.println("sorting " + sortE[i].ymin + "  " + sortE[i].ymax + "  " + sortE[i].xval + "  " + sortE[i].m);
+                if (sortE[j].ymin > sortE[i].ymin) {
+//                    System.out.println("swapping : " + i + " with " +j);
+                    temp = sortE[i];
+                    sortE[i] = sortE[j];
+                    sortE[j] = temp;;
+                }
+                if (sortE[j].ymin == sortE[i].ymin) {
+                    if (sortE[j].xval > sortE[i].xval) {
+//                        System.out.println("swapping : " + i + " with " +j);
+                        temp = sortE[i];
+                        sortE[i] = sortE[j];
+                        sortE[j] = temp;
+                    }
+                }
+//                temp = sortE[i];
+//                sortE[i] = sortE[j];
+//                sortE[j] = temp;
+
+            }
+//            printE(sortE);
+            ret[counter] = sortE[j];
+//            System.out.println("sorted " + ret[i].ymin + "  " + ret[i].ymax + "  " + ret[i].xval + "  " + ret[i].m);
+            counter++;
+        }
+        return ret;
+    }
+
+    private edges[] sortX(edges[] sortE) {
+        edges[] ret = new edges[sortE.length];
+//        printE(sortE);  
+//        System.out.println("sorting ");
+        edges temp = new edges();
+        int counter = 0;
+        for (int j = 0; j < sortE.length; j++) {
+            for (int i = j + 1; i < sortE.length; i++) {
+
+                if (sortE[j].xval > sortE[i].xval) {
+//                        System.out.println("swapping : " + i + " with " +j);
+                    temp = sortE[i];
+                    sortE[i] = sortE[j];
+                    sortE[j] = temp;
+                }
+
+//                temp = sortE[i];
+//                sortE[i] = sortE[j];
+//                sortE[j] = temp;
+            }
+//            printE(sortE);
+            ret[counter] = sortE[j];
+//            System.out.println("sorted " + ret[i].ymin + "  " + ret[i].ymax + "  " + ret[i].xval + "  " + ret[i].m);
+            counter++;
+        }
+        return ret;
+    }
+
+    private void drawPoly(polygon thing1) {
+        int[] xList = new int[thing1.coords.size() / 2];
+        int[] yList = new int[thing1.coords.size() / 2];
+        edges[] all_edges = new edges[xList.length];
+        for (int i = 0; i < (thing1.coords.size()) / 2; i++) {
+            all_edges[i] = new edges();
+            xList[i] = (int) thing1.coords.get(2 * i);
+            yList[i] = (int) thing1.coords.get((2 * i) + 1);
+        }
+        for (int i = 0; i < xList.length; i++) {
+//            System.out.print("x values : " + xList[i]);
+//            System.out.println("      y values : " + xList[i]);
+            if (i == xList.length - 1) {
+                if (yList[i] >= yList[0]) {
+                    all_edges[i].ymax = yList[i];
+                    all_edges[i].xval = xList[i];
+                    all_edges[i].ymin = yList[i];
+                } else {
+                    all_edges[i].ymax = yList[i + 1];
+                    all_edges[i].xval = xList[i];
+                    all_edges[i].ymin = yList[i];
+                }
+
+            } else if (yList[i] >= yList[i + 1]) {
+                all_edges[i].ymax = yList[i];
+                all_edges[i].xval = xList[i + 1];
+                all_edges[i].ymin = yList[i + 1];
+            } else {
+//                    System.out.println(all_edges[i] + "      y values : " + yList[i + 1]);
+                all_edges[i].ymax = yList[i + 1];
+                all_edges[i].xval = xList[i];
+                all_edges[i].ymin = yList[i];
+            }
+            if (i == xList.length - 1) {
+                if ((yList[0] > yList[i])) {
+                    all_edges[i].m = (float) (xList[0] - xList[i]) / (yList[0] - yList[i]);
+                } else if ((yList[0] < yList[i])) {
+                    all_edges[i].m = (float) (xList[i] - xList[0]) / (yList[i] - yList[0]);
+                } else {
+                    all_edges[i].m = -9999;
+                }
+            } else if ((yList[i + 1] > yList[i])) {
+//                    System.out.println((yList[i + 1] - yList[i]));
+//                    System.out.println((xList[i + 1] - xList[i]));
+                all_edges[i].m = (float) (xList[i + 1] - xList[i]) / (yList[i + 1] - yList[i]);
+            } else if ((yList[i + 1] < yList[i])) {
+                all_edges[i].m = (float) (xList[i] - xList[i + 1]) / (yList[i] - yList[i + 1]);
+            } else {
+                all_edges[i].m = -9999;
+            }
+        }
+        int counter = 0;
+        for (int i = 0; i < all_edges.length; i++) {
+            if (all_edges[i].m != -9999) {
+                counter++;
+            }
+            System.out.println(all_edges[i].ymin + "  " + all_edges[i].ymax + "  " + all_edges[i].xval + "  " + all_edges[i].m);
+        }
+        edges[] global_edges = new edges[counter];
+        int countx = 0;
+        for (int i = 0; i < counter; i++) {
+            global_edges[i] = new edges();
+            if (all_edges[i].m != -9999) {
+//                for (int j = 0; j < countx; j++) {
+                global_edges[countx] = all_edges[i];
+                countx++;
+//                }
+            }
+//            System.out.println("global : " + global_edges[i].ymin + "  " + global_edges[i].ymax + "  " + global_edges[i].xval + "  " + global_edges[i].m);
+        }
+        global_edges = sortY(global_edges);
+        printE(global_edges);
+
+        double ysetter = global_edges[0].ymin;
+        int activeC = 0, CC = 0;
+        for (int i = 0; i < global_edges.length; i++) {
+            if (global_edges[i].ymin == ysetter) {
+                activeC++;
+            }
+        }
+        edges[] active_edges = new edges[activeC];
+        for (int i = 0; i < global_edges.length; i++) {
+            if (global_edges[i].ymin == ysetter) {
+                active_edges[CC] = new edges();
+                active_edges[CC] = global_edges[i];
+                CC++;
+            }
+        }
+        printE(active_edges);
+        drawEdges(active_edges, global_edges, thing1.colors);
+    }
+
+    private void drawEdges(edges[] active, edges[] global, float[] color) {
+
+        double scanline = active[0].ymin;
+//        while (true) {
+        glLoadIdentity();
+        glColor3f(color[0], color[1], color[2]);
+        glPointSize(1);
+        int min = 0;
+        while (active.length != 0) {
+//            glBegin(GL_LINES);
+            active = sortX(active);
+            for (int i = 0; i < active.length; i++) {
+                if (i % 2 == 0) {
+                    glBegin(GL_LINES);
+//                    System.out.println(active[i].xval + " to " + active[i + 1].xval + "  inc  " + active[i].m);
+                    glVertex2f((float) active[i].xval, (float) scanline);
+                    glVertex2f((float) active[i + 1].xval, (float) scanline);
+                    glEnd();
+                }
+                active[i].xval += active[i].m;
+//                System.out.println("  inc  " + active[i].m);
+                if (active[i].ymax == (scanline + 1)) {
+//                    System.out.println("subbing length");
+                    min++;
+                    active[i] = null;
+                }
+
+            }
+            int max = 0;
+            for (int k = 0; k < global.length; k++) {
+                if (global[k].ymin == (scanline + 1)) {
+//                    System.out.println("adding length");
+                    max++;
+                }
+            }
+
+            edges[] transfer = new edges[active.length - min + max];
+//            System.out.println(active.length + " min : " + min + "  max  " + max);
+            min = 0;
+            int tran = 0;
+            for (int k = 0; k < active.length; k++) {
+                if (active[k] != null) {
+                    transfer[tran] = active[k];
+                    tran++;
+                }
+            }
+
+            for (int k = 0; k < global.length; k++) {
+                if (global[k].ymin == (scanline + 1)) {
+                    transfer[tran] = global[k];
+                    tran++;
+                }
+            }
+            active = transfer;
+//            System.out.println("Scanline at " + scanline + " new active table ");
+//            printE(active);
+////            glEnd();
+            Display.update();
+            Display.sync(60);
+
+            scanline++;
+        }
+//        }
+    }
+    
+    
+/*        private void transformPoly() {
+        String[] set, setT;
+        String type;
+
+//        System.out.println("TRANSFORMING");
+//        = (String) holder.get(count);
+//        set = (type.split(" "));
+//        count++;
+        while (count < instr.size()) {
+            type = (String) instr.get(count);
+            set = (type.split(" "));
+            count++;
+            if (set[0].equals("P") == false) {
+
+//                System.out.println("hit1");
+                tranH.add(set);
+            } else if ((set[0].equals("P"))) {
+//                System.out.println("AAA");
+                for (int i = 0; i < tranH.size(); i++) {
+                    setT = (String[]) tranH.get(i);
+
+//                    System.out.println("inside2 " + setT[0]);
+                    if (setT[0].equals("t")) {
+//                        System.out.println("translating " + setT);
+                        glTranslatef(Integer.parseInt(setT[1]), Integer.parseInt(setT[2]), 1);
+                    } else if (setT[0].equals("r")) {
+//                        System.out.println("rotating " + setT);
+                        glRotatef(Integer.parseInt(setT[1]), Integer.parseInt(setT[2]), Integer.parseInt(setT[3]), 1);
+                    } else if ((set[0].equals("s"))) {
+//                        System.out.println("scaling " + setT);
+                        glRotatef(Integer.parseInt(setT[1]), Integer.parseInt(setT[2]), Integer.parseInt(setT[3]), 1);
+                    }
+                }
+//               makePoly(set);
+            }
+        }
+
+//                drawEdges(active_edges, global_edges);
+    }*/
+
+    private void transformPoly(){
+//        glScalef(x,y,z);
+//        glTranslatef(x, y, z);
+//        glRotatef(angle, x, y, z);    in 2d, z=1
+          
+        glTranslatef(100, -75, 0);
+        glRotatef(30, 0, 0, 1);
+        glScalef(0.5f, 1.5f, 0);
+        
+    }
+    
+    private void transformPoly2(){
+//        glScalef(x,y,z);
+//        glTranslatef(x, y, z);
+//        glRotatef(angle, x, y, z);    in 2d, z=1
+        glRotatef(90, 0, 0, 1);  
+        glScalef(2.0f, 2.0f, 0);
+        glTranslatef(30, 30, 0);
+        glRotatef(-45, 0, 0, 1);
+        
+        
+    }
+    
+    
+    public class polygon {
+        
+        ArrayList coords = new ArrayList<Integer>();
+        float[] colors = {0, 0, 0};
+    }
+
+    public class edges {
+        double ymax = 1;
+        double ymin = 1;
+        double xval = 1;
+        double m = 1.0;
+
+        public void edges() {
+            ymax = 1;
+            ymin = 1;
+            xval = 1;
+            m = 1;
+        }
+    }
+}

@@ -1,0 +1,285 @@
+/***************************************************************
+* file: Primitive.java
+* author: Kyle Turchik
+* class: CS 445 - Computer Graphics
+*
+* assignment: program 1
+* date last modified: 10/11/2016
+*
+* purpose: This program reads in instructions and coordinates from 
+* a file and draws primitive shapes based on that information.
+*
+****************************************************************/ 
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.input.Keyboard;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Project2VuEdited {
+
+     // Main Window settings
+    public static final int WINDOW_WIDTH = 640;
+    public static final int WINDOW_HEIGHT = 480;
+    public static final String WINDOW_TITLE = "Kyle Turchik - Project 2";
+    
+    ArrayList coords = new ArrayList();
+    static int count = 0;
+
+    
+    // method: main
+    // purpose: basic driver method that starts the program
+    public static void main(String[] args) throws Exception {
+        // TODO code application logic here\
+        Project2VuEdited proj = new Project2VuEdited();
+        proj.start();
+    }
+    
+    
+    private void start() throws Exception {
+        createWindow();
+        initGL();
+
+        File file = new File("coordinates.txt");
+        
+        while(!Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+            //render
+            readFile(file); 
+            Display.update();
+            Display.sync(60);
+        }   
+        Display.destroy();
+    }
+    
+    
+    //TODO This is Vu's Code change it up a bit
+    // method: readFile
+    // purpose: sequentially reads in data line by line from a premade file
+    // then performs commands based on the data
+    private void readFile(File file) throws IOException {
+        String line, args[];
+        Scanner reader = new Scanner(file);
+
+        while (reader.hasNext()) {
+            coords.add(reader.nextLine());
+        }
+
+        while (count < coords.size()) {
+            line = (String) coords.get(count);
+            //
+            System.out.println("outside : " + line);
+            //
+            count++;
+            args = line.split(" ");
+            if (args[0].equals("P")) {
+                drawEdges(args);
+            }
+        }
+
+        System.out.println("End : Count = 0");
+        count = 0;
+    }
+
+    private void createWindow() throws Exception {
+        Display.setFullscreen(false);
+        Display.setDisplayMode(new DisplayMode(WINDOW_WIDTH, WINDOW_HEIGHT));
+        Display.setTitle(WINDOW_TITLE);
+        Display.create();
+    }
+
+    private void initGL() {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, 640, 0, 480, 1, -1);
+        glMatrixMode(GL_MODELVIEW);
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    }
+
+    private void drawEdges(String[] args) {
+        polygon shape = new polygon();
+        String type = (String) coords.get(count);
+        shape.colors[0] = Float.parseFloat(args[1]);
+        shape.colors[1] = Float.parseFloat(args[2]);
+        shape.colors[2] = Float.parseFloat(args[3]);
+        while (count < coords.size()) {
+            type = (String) coords.get(count);
+            args = (type.split(" "));
+            count++;
+            if (args[0].equals("T") == false) {
+                System.out.println("inside " + type);
+                shape.coords.add(Integer.parseInt(args[0]));
+                shape.coords.add(Integer.parseInt(args[1]));
+            } else {
+                drawPoly(shape);
+                transformPoly();
+            }
+        }
+    }
+
+    
+    private edges[] sortEdges(edges[] sortE) {
+        edges[] ret = new edges[sortE.length];
+//        printE(sortE);  
+        edges temp = new edges();
+        int counter = 0;
+        for (int j = 0; j < sortE.length; j++) {
+            for (int i = j+1; i < sortE.length; i++) {
+//            System.out.println("sorting " + sortE[i].ymin + "  " + sortE[i].ymax + "  " + sortE[i].xval + "  " + sortE[i].m);
+                if (sortE[j].ymin > sortE[i].ymin) {
+//                    System.out.println("swapping : " + i + " with " +j);
+                    temp = sortE[i];
+                    sortE[i] = sortE[j];
+                    sortE[j] = temp;;
+                }
+                if (sortE[j].ymin == sortE[i].ymin) {
+                    if (sortE[j].xval > sortE[i].xval) {
+//                        System.out.println("swapping : " + i + " with " +j);
+                        temp = sortE[i];
+                        sortE[i] = sortE[j];
+                        sortE[j] = temp;
+                    }
+                }
+//                temp = sortE[i];
+//                sortE[i] = sortE[j];
+//                sortE[j] = temp;
+
+            }
+//            printE(sortE);
+            ret[counter] = sortE[j];
+//            System.out.println("sorted " + ret[i].ymin + "  " + ret[i].ymax + "  " + ret[i].xval + "  " + ret[i].m);
+            counter++;
+        }
+        return ret;
+    }
+    
+    private void transformPoly() {
+        String[] set;
+        String type;
+//        = (String) holder.get(count);
+//        set = (type.split(" "));
+//        count++;
+        while (count < coords.size()) {
+            type = (String) coords.get(count);
+            System.out.println("inside2 " + type);
+            set = (type.split(" "));
+            count++;
+            if (set[0].equals("t")) {
+
+            } else if (set[0].equals("r")) {
+
+            } else if ((set[0].equals("s"))) {
+
+            } else if ((set[0].equals("P"))) {
+                drawEdges(set);
+            }
+        }
+    }
+
+    private void drawPoly(polygon shape) {
+        int[] xList = new int[shape.coords.size() / 2];
+        int[] yList = new int[shape.coords.size() / 2];
+        edges[] all_edges = new edges[xList.length];
+        for (int i = 0; i < (shape.coords.size()) / 2; i++) {
+            all_edges[i] = new edges();
+            xList[i] = (int) shape.coords.get(2 * i);
+            yList[i] = (int) shape.coords.get((2 * i) + 1);
+        }
+        for (int i = 0; i < xList.length; i++) {
+//            System.out.print("x values : " + xList[i]);
+//            System.out.println("      y values : " + xList[i]);
+            if (i == xList.length - 1) {
+                if (yList[i] >= yList[0]) {
+                    all_edges[i].ymax = yList[i];
+                    all_edges[i].xval = xList[i];
+                    all_edges[i].ymin = yList[i];
+                } else {
+                    all_edges[i].ymax = yList[i + 1];
+                    all_edges[i].xval = xList[i + 1];
+                    all_edges[i].ymin = yList[i];
+                }
+
+            } else if (yList[i] >= yList[i + 1]) {
+                all_edges[i].ymax = yList[i];
+                all_edges[i].xval = xList[i];
+                all_edges[i].ymin = yList[i + 1];
+            } else {
+//                    System.out.println(all_edges[i] + "      y values : " + yList[i + 1]);
+                all_edges[i].ymax = yList[i + 1];
+                all_edges[i].xval = xList[i + 1];
+                all_edges[i].ymin = yList[i];
+            }
+            if (i == xList.length - 1) {
+                if ((yList[0] > yList[i])) {
+                    all_edges[i].m = (float)(xList[0] - xList[i])/(yList[0] - yList[i]) ;
+                }
+                else if ((yList[0] < yList[i])) {
+                    all_edges[i].m =  (float)(xList[i] - xList[0])/(yList[i] - yList[0]);
+                }
+                else
+                all_edges[i].m = -9999;
+            }
+            
+            else {
+                if ((yList[i + 1] > yList[i])) {
+//                    System.out.println((yList[i + 1] - yList[i]));
+//                    System.out.println((xList[i + 1] - xList[i]));
+                    all_edges[i].m =  (float)(xList[i + 1] - xList[i])/(yList[i + 1] - yList[i]);
+                }
+                else if ((yList[i + 1] < yList[i])) {
+                    all_edges[i].m = (float)(xList[i] - xList[i + 1])/(yList[i] - yList[i + 1]);
+                }
+                else
+                all_edges[i].m = -9999;
+            }
+        }
+        for (int i =0; i< all_edges.length; i++){
+            System.out.println(all_edges[i].ymin + "  " + all_edges[i].ymax + "  " + all_edges[i].xval + "  " + all_edges[i].m);
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        /*private void printE(edges[] x) {
+        for (int i = 0; i < x.length; i++) {
+            System.out.println("Printing : " + x[i].ymin + "  " + x[i].ymax + "  " + x[i].xval + "  " + x[i].m);
+        }
+        System.out.println();*/
+    }
+
+    public class polygon {
+
+        ArrayList coords = new ArrayList<Integer>();
+        float[] colors = {0, 0, 0};
+    }
+
+    public class edges {
+
+        double ymax = 1;
+        double ymin = 1;
+        double xval = 1;
+        double m = 1.0;
+
+        public void edges() {
+            ymax = 1;
+            ymin = 1;
+            xval = 1;
+            m = 1;
+        }
+
+    }
+}

@@ -1,0 +1,208 @@
+/***************************************************************
+* file: FillPolygon.java
+* author: Matthew Lee
+* class: CS 445 - Computer Graphics
+*
+* assignment: program 2
+* date last modified: 10/25/16
+*
+* purpose: This program reads in coordinates from a text file and 
+* draws a polygon that fills and gets transformed
+*
+****************************************************************/
+package fillpolygon;
+
+/**
+ *
+ * @author Matthew
+ */
+import org.lwjgl.LWJGLException;
+import java.io.*;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.input.Keyboard;
+import java.lang.Math;
+
+public class FillPolygon {
+
+    /**
+     * @param args the command line arguments
+     */
+
+    public static String pString = "";
+    public static String tString = "";
+    public static int arrCounter;
+    public static int pCounter = 0;
+    public static int tCounter = 0;
+    
+    public static void main(String[] args) {
+        FillPolygon basic = new FillPolygon();
+        basic.start();
+    }
+    //method: start
+    //purpose: calls functions to start creating the window and its contents
+    public void start(){
+        try{
+            createWindow();
+            initGL();
+            render();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    
+    //method: createWindow
+    //purpose: creates the window, specifying no fullscreen and its resolution, title
+    private void createWindow() throws Exception{
+        Display.setFullscreen(false);
+        Display.setDisplayMode(new DisplayMode(640,480));
+        Display.setTitle("Fill Polygons");
+        Display.create();
+    }
+    
+    //method: initGL
+    //purpose: initialize background color, camera, matrix 
+    private void initGL(){
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        
+//        glOrtho(0, 640, 0, 480, 1, -1);
+        glOrtho(-320, 320, -240, 240, 1, -1);
+        
+        glMatrixMode(GL_MODELVIEW);
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    }
+    
+    //method: render
+    //purpose: Display drawings by reading the text file. Can exit by pressing Esc key
+    private void render() {
+        while (!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+            try{
+                
+            readFile();
+            
+            Display.update();
+            Display.sync(60);
+                }catch(Exception e){
+                }
+        }
+        Display.destroy();
+    }
+    
+    //method: readFile
+    //purpose: read text file line by line, calls checkCommand for each line
+    //in order to draw each one
+    public void readFile(){
+        try{
+            FileInputStream fstream = new FileInputStream("coordinates.txt");
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            //int i = 0;
+            while ((strLine = br.readLine()) != null)   {
+                
+                 // Print the content on the console
+                //System.out.println (strLine);
+                //array[i] = strLine;
+                //i++;
+                checkCommand(strLine);
+                
+            }
+            
+            //System.out.println(pString);
+            //System.out.println(tString);
+            
+            in.close();
+        }catch(Exception e){
+            System.out.println("Error: " + e.getMessage());
+            
+        }
+    }
+    
+    //method: checkCommand
+    //purpose: split line in text file, store as array, calls appropriate   //////change
+    //function to draw depending on first value
+    private void checkCommand(String str){
+        //String[] s = str.split("[, ]");
+        
+        if(str.charAt(0) == 'P'){
+
+            pString = (str+" ");
+        }
+        else if(str.charAt(0) == 'T'){
+            glTranslatef(100, -75, 0);
+            glRotatef(30, 0, 0, 1);
+            glScalef(0.5f, 1.5f, 0);
+            drawPolygon(pString);
+            
+            tString += (str+" ");
+        }
+        else if(str.charAt(0) == 't' ||str.charAt(0) == 'r'|| str.charAt(0) == 's'){
+            tString += (str+" ");
+        }
+        else{
+            pString += (str+" ");
+        }
+        
+    }
+    
+    private void drawPolygon(String p){
+        String[] s = p.split("\\s+");
+        
+        System.out.println("array length: " + s.length);
+        for(int j = 0; j < s.length; j++){
+            System.out.print(s[j] + " ");
+        }
+        
+        
+        for(int i = 4; i < s.length-3; i+=2){
+            drawLine(s, s[i], s[i+1], s[i+2], s[i+3]);
+        }
+        drawLine(s, s[4], s[5], s[s.length-2], s[s.length-1]);
+    }
+    private void drawLine(String[] s, String xOne, String yOne, String xTwo, String yTwo){      //change l
+        glColor3f(Float.parseFloat(s[1]), Float.parseFloat(s[2]), Float.parseFloat(s[3]));
+        //glColor3f(1.0f, 0.0f, 0.0f);
+        int x1 = Integer.parseInt(xOne);
+        int x2 = Integer.parseInt(xTwo);
+        int y1 = Integer.parseInt(yOne);
+        int y2 = Integer.parseInt(yTwo);
+        
+        glBegin(GL_LINE_STRIP);
+        glVertex2f((float)x1, (float)y1); 
+        glVertex2f((float)x2, (float)y2);
+        glEnd();
+
+    }
+    
+    private void transformPoly(String tPoly){
+//        glScalef(x,y,z);
+//        glTranslatef(x, y, z);
+//        glRotatef(angle, x, y, z);    in 2d, z=1
+          
+        glTranslatef(100, -75, 0);
+        glRotatef(30, 0, 0, 1);
+        glScalef(0.5f, 1.5f, 0);
+        
+    }
+    
+    private void transformPoly2(String tPoly){
+//        glScalef(x,y,z);
+//        glTranslatef(x, y, z);
+//        glRotatef(angle, x, y, z);    in 2d, z=1
+        glRotatef(90, 0, 0, 1);  
+        glScalef(2.0f, 2.0f, 0);
+        glTranslatef(30, 30, 0);
+        glRotatef(-45, 0, 0, 1);
+        
+        
+    }
+    
+    
+    private void fillPolygon(){
+        
+    }
+}

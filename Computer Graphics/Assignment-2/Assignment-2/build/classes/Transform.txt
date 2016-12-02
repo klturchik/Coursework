@@ -1,0 +1,230 @@
+/***************************************************************
+* file: Primitive.java
+* author: Kyle Turchik
+* class: CS 445 - Computer Graphics
+*
+* assignment: program 1
+* date last modified: 10/11/2016
+*
+* purpose: This program reads in instructions and coordinates from 
+* a file and draws primitive shapes based on that information.
+*
+****************************************************************/ 
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
+import static org.lwjgl.opengl.GL11.*;
+import org.lwjgl.input.Keyboard;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+public class Transform {
+
+     // Main Window settings
+    public static final int WINDOW_WIDTH = 640;
+    public static final int WINDOW_HEIGHT = 480;
+    public static final String WINDOW_TITLE = "Kyle Turchik - Project 2";
+    
+    
+    
+    ArrayList holder = new ArrayList();
+    static int count = 0;
+
+    
+    
+    
+    private void start() throws Exception {
+        createWindow();
+        initGL();
+
+        File file = new File("coordinates.txt");
+        
+        while(!Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+            //render
+            readFile(file); 
+            Display.update();
+            Display.sync(60);
+        }   
+        Display.destroy();
+    }
+    
+    
+    //TODO This is Vu's Code change it up a bit
+    // method: readFile
+    // purpose: sequentially reads in data line by line from a premade file
+    private void readFile(File file) throws IOException {
+        String type, set[];
+        Scanner reader = new Scanner(file);
+
+        while (reader.hasNext()) {
+            holder.add(reader.nextLine());
+        }
+        //!Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)
+        while (count < holder.size()) {
+            type = (String) holder.get(count);
+            System.out.println("outside : " + type);
+            count++;
+            set = type.split(" ");
+            if (set[0].equals("P")) {
+                makePoly(set);
+            }
+        }
+
+        System.out.println("End : Count = 0");
+        count = 0;
+    }
+
+    private void createWindow() throws Exception {
+        Display.setFullscreen(false);
+        Display.setDisplayMode(new DisplayMode(WINDOW_WIDTH, WINDOW_HEIGHT));
+        Display.setTitle(WINDOW_TITLE);
+        Display.create();
+    }
+
+    private void initGL() {
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(0, 640, 0, 480, 1, -1);
+        glMatrixMode(GL_MODELVIEW);
+        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    }
+
+    private void makePoly(String[] set) {
+        polygon thing1 = new polygon();
+        String type = (String) holder.get(count);
+        thing1.colors[0] = Float.parseFloat(set[1]);
+        thing1.colors[1] = Float.parseFloat(set[2]);
+        thing1.colors[2] = Float.parseFloat(set[3]);
+        while (count < holder.size()) {
+            type = (String) holder.get(count);
+            set = (type.split(" "));
+            count++;
+            if (set[0].equals("T") == false) {
+                System.out.println("inside " + type);
+                thing1.coor.add(Integer.parseInt(set[0]));
+                thing1.coor.add(Integer.parseInt(set[1]));
+            } else {
+                drawPoly(thing1);
+                transformPoly();
+            }
+        }
+
+    }
+
+    private void transformPoly() {
+        String[] set;
+        String type;
+//        = (String) holder.get(count);
+//        set = (type.split(" "));
+//        count++;
+        while (count < holder.size()) {
+            type = (String) holder.get(count);
+            System.out.println("inside2 " + type);
+            set = (type.split(" "));
+            count++;
+            if (set[0].equals("t")) {
+
+            } else if (set[0].equals("r")) {
+
+            } else if ((set[0].equals("s"))) {
+
+            } else if ((set[0].equals("P"))) {
+                makePoly(set);
+            }
+        }
+    }
+
+    private void drawPoly(polygon thing1) {
+        int[] xList = new int[thing1.coor.size() / 2];
+        int[] yList = new int[thing1.coor.size() / 2];
+        edges[] all_edges = new edges[xList.length];
+        for (int i = 0; i < (thing1.coor.size()) / 2; i++) {
+            all_edges[i] = new edges();
+            xList[i] = (int) thing1.coor.get(2 * i);
+            yList[i] = (int) thing1.coor.get((2 * i) + 1);
+        }
+        for (int i = 0; i < xList.length; i++) {
+//            System.out.print("x values : " + xList[i]);
+//            System.out.println("      y values : " + xList[i]);
+            if (i == xList.length - 1) {
+                if (yList[i] >= yList[0]) {
+                    all_edges[i].ymax = yList[i];
+                    all_edges[i].xval = xList[i];
+                    all_edges[i].ymin = yList[i];
+                } else {
+                    all_edges[i].ymax = yList[i + 1];
+                    all_edges[i].xval = xList[i + 1];
+                    all_edges[i].ymin = yList[i];
+                }
+
+            } else if (yList[i] >= yList[i + 1]) {
+                all_edges[i].ymax = yList[i];
+                all_edges[i].xval = xList[i];
+                all_edges[i].ymin = yList[i + 1];
+            } else {
+//                    System.out.println(all_edges[i] + "      y values : " + yList[i + 1]);
+                all_edges[i].ymax = yList[i + 1];
+                all_edges[i].xval = xList[i + 1];
+                all_edges[i].ymin = yList[i];
+            }
+            if (i == xList.length - 1) {
+                if ((yList[0] > yList[i])) {
+                    all_edges[i].m = (float)(xList[0] - xList[i])/(yList[0] - yList[i]) ;
+                }
+                else if ((yList[0] < yList[i])) {
+                    all_edges[i].m =  (float)(xList[i] - xList[0])/(yList[i] - yList[0]);
+                }
+                else
+                all_edges[i].m = -9999;
+            }
+            
+            else {
+                if ((yList[i + 1] > yList[i])) {
+//                    System.out.println((yList[i + 1] - yList[i]));
+//                    System.out.println((xList[i + 1] - xList[i]));
+                    all_edges[i].m =  (float)(xList[i + 1] - xList[i])/(yList[i + 1] - yList[i]);
+                }
+                else if ((yList[i + 1] < yList[i])) {
+                    all_edges[i].m = (float)(xList[i] - xList[i + 1])/(yList[i] - yList[i + 1]);
+                }
+                else
+                all_edges[i].m = -9999;
+            }
+        }
+        for (int i =0; i< all_edges.length; i++){
+            System.out.println(all_edges[i].ymin + "  " + all_edges[i].ymax + "  " + all_edges[i].xval + "  " + all_edges[i].m);
+        }
+
+    }
+
+    public class polygon {
+
+        ArrayList coor = new ArrayList<Integer>();
+        float[] colors = {0, 0, 0};
+    }
+
+    public class edges {
+
+        double ymax = 1;
+        double ymin = 1;
+        double xval = 1;
+        double m = 1.0;
+
+        public void edges() {
+            ymax = 1;
+            ymin = 1;
+            xval = 1;
+            m = 1;
+        }
+
+    }
+}
